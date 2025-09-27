@@ -148,7 +148,7 @@ public class CapabilitiesFactory {
      */
     public static DesiredCapabilities createCalculatorCapabilitiesForDemo() {
         String defaultDevice = "Android Device"; // Works with any connected device/emulator
-        String defaultVersion = "11"; // Compatible with most modern Android versions
+        String defaultVersion = "16"; // Compatible with most modern Android versions
         return createCalculatorCapabilities(defaultDevice, defaultVersion);
     }
     

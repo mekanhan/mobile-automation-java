@@ -90,9 +90,21 @@ public class SimpleCalculatorPage {
     public void performAddition(int num1, int num2) {
         LOGGER.info("Performing addition: {} + {}", num1, num2);
         clickClear(); // Ensure clean state
-        clickDigit(num1);
+        
+        // Enter first number digit by digit
+        String firstNumber = String.valueOf(num1);
+        for (char digit : firstNumber.toCharArray()) {
+            clickDigit(Character.getNumericValue(digit));
+        }
+        
         clickAdd();
-        clickDigit(num2);
+        
+        // Enter second number digit by digit
+        String secondNumber = String.valueOf(num2);
+        for (char digit : secondNumber.toCharArray()) {
+            clickDigit(Character.getNumericValue(digit));
+        }
+        
         clickEquals();
     }
     

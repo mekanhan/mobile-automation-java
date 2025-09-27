@@ -48,8 +48,14 @@ else
 fi
 
 # 2. Check Maven
-if command -v mvn &> /dev/null; then
-    MVN_VERSION=$(mvn -version | head -n 1)
+if command -v mvn &> /dev/null || command -v mvnd &> /dev/null; then
+    # Determine which Maven command to use
+    if command -v mvnd &> /dev/null; then
+        MVN_CMD="mvnd"
+    else
+        MVN_CMD="mvn"
+    fi
+    MVN_VERSION=$($MVN_CMD -version | head -n 1)
     print_success "Maven found: $MVN_VERSION"
 else
     print_error "Maven not found. Please install Maven"
@@ -94,7 +100,7 @@ echo ""
 
 # Clean and compile
 print_status "Cleaning and compiling project..."
-mvn clean compile -q
+$MVN_CMD clean compile -q
 
 if [ $? -ne 0 ]; then
     print_error "Maven compilation failed"
@@ -107,7 +113,7 @@ print_success "Compilation successful"
 print_status "Running Calculator automation demo..."
 echo ""
 
-mvn test -Dtest=CalculatorTestRunner -Dcucumber.filter.tags="@calculator and @smoke"
+mvnd test -Dtest=CalculatorTestRunner -Dcucumber.filter.tags="@calculator and @smoke"
 
 # Check test results
 if [ $? -eq 0 ]; then
