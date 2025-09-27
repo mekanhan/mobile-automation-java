@@ -1,0 +1,10 @@
+target/*
+logs
+surefire-reports
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+.idea
+*.iml
