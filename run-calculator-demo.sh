@@ -96,6 +96,11 @@ fi
 
 echo ""
 print_status "All prerequisites met! Starting Calculator demo..."
+print_status "Using NEW Mobile Automation Architecture:"
+print_status "  ✓ Cross-platform driver management"
+print_status "  ✓ Enhanced wait strategies"
+print_status "  ✓ Configuration management"
+print_status "  ✓ Improved page object model"
 echo ""
 
 # Clean and compile
@@ -110,10 +115,15 @@ fi
 print_success "Compilation successful"
 
 # Run Calculator demo tests
-print_status "Running Calculator automation demo..."
+print_status "Running Calculator automation demo with new architecture..."
+print_status "Test Configuration:"
+print_status "  Platform: Android"
+print_status "  Environment: Local"
+print_status "  Test Runner: CalculatorTestRunner (updated)"
+print_status "  Features: Calculator smoke tests"
 echo ""
 
-mvnd test -Dtest=CalculatorTestRunner -Dcucumber.filter.tags="@calculator and @smoke"
+$MVN_CMD test -Dtest=CalculatorTestRunner -Dplatform=android -Denvironment=local
 
 # Check test results
 if [ $? -eq 0 ]; then
@@ -139,10 +149,12 @@ else
     print_error "❌ Calculator demo failed"
     print_status "Check logs above for error details"
     print_status "Common issues:"
-    print_status "  - Calculator app not installed (try different app package)"
-    print_status "  - Device screen locked"
+    print_status "  - Calculator app not installed on device"
+    print_status "  - Device screen locked or sleep mode"
     print_status "  - Appium server connection issues"
     print_status "  - Element locators changed (different Android version)"
+    print_status "  - Configuration files missing in src/test/resources/config/"
+    print_status "  - Step definitions not found (package path issues)"
     exit 1
 fi
 
