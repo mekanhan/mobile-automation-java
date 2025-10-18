@@ -1,1 +1,30 @@
-/target 
+# Maven
+/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Test Reports
+/test-output/
+/allure-results/
+/cucumber-reports/
+/surefire-reports/
+.allure/
+
+
+# Mobile Apps
+/src/main/resources/apps/**
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
