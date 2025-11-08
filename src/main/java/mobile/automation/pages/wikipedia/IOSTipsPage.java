@@ -1,4 +1,4 @@
-package mobile.automation.pages.app1;
+package mobile.automation.pages.wikipedia;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;

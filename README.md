@@ -107,13 +107,13 @@ mvn test -Dcucumber.filter.tags="@android"
 # iOS only
 mvn test -Dcucumber.filter.tags="@ios"
 Run App-Specific Tests
-bash# App1 tests
-mvn test -Dcucumber.filter.tags="@app1"
+bash# Wikipedia tests
+mvn test -Dcucumber.filter.tags="@wikipedia"
 
 # Specific feature
-mvn test -Dcucumber.options="src/test/resources/features/app1/login.feature"
+mvn test -Dcucumber.options="src/test/resources/features/wikipedia/login.feature"
 Run with Custom Configuration
-bashmvn test -Dplatform=android -Ddevice=real -Dapp=app1
+bashmvn test -Dplatform=android -Ddevice=real -Dapp=wikipedia
 📊 Test Reports
 Generate Allure Report
 bash# Generate report
@@ -143,14 +143,14 @@ ios.device.name=iPhone 15
 ios.platform.version=17.0
 
 # App Configuration
-app.name=app1
-app1.android.path=src/main/resources/apps/android/app1.apk
-app1.ios.path=src/main/resources/apps/ios/app1.app
+app.name=wikipedia
+wikipedia.android.path=src/main/resources/apps/android/wikipedia.apk
+wikipedia.ios.path=src/main/resources/apps/ios/wikipedia.app
 📱 Supported Applications
-AppDescriptionPackage/Bundle IDApp1E-commerce Democom.example.app1App2Social Media Democom.example.app2
+AppDescriptionPackage/Bundle IDWikipediaWikipedia iOS Apporg.wikimedia.wikipediaApp2Social Media Democom.example.app2
 🧪 Writing Tests
 Cucumber Feature File
-gherkin@app1 @android @ios
+gherkin@wikipedia @android @ios
 Feature: Login Functionality
 
   @smoke

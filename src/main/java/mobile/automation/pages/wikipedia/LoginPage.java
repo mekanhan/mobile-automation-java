@@ -1,4 +1,4 @@
-package mobile.automation.pages.app1;
+package mobile.automation.pages.wikipedia;
 
 public class LoginPage {
     // Define locators for the login page

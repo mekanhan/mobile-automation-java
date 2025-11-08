@@ -104,11 +104,26 @@ public class ScreenRecorder {
         }
 
         try {
-            // Stop the recording process
-            recordingProcess.destroy();
+            System.out.println("⏹️  Stopping screen recording...");
 
-            // Wait for process to terminate
-            recordingProcess.waitFor();
+            // For iOS: Send SIGINT to properly close the video file
+            // Using destroy() kills the process too quickly and corrupts the video
+            if (System.getProperty("android.recording.path") == null) {
+                // This is iOS recording - need to stop gracefully
+                stopIOSRecordingGracefully();
+            } else {
+                // Android recording - destroy is fine
+                recordingProcess.destroy();
+            }
+
+            // Wait for process to terminate (max 5 seconds)
+            boolean terminated = recordingProcess.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+
+            if (!terminated) {
+                System.err.println("⚠️  Recording process did not terminate, forcing...");
+                recordingProcess.destroyForcibly();
+                recordingProcess.waitFor();
+            }
 
             // For Android, pull the video from device
             if (System.getProperty("android.recording.path") != null) {
@@ -116,18 +131,65 @@ public class ScreenRecorder {
             }
 
             isRecording = false;
-            System.out.println("⏹️  Screen recording stopped: " + videoFilePath);
+            System.out.println("✅ Screen recording stopped: " + videoFilePath);
 
-            // Wait a bit for file to be fully written
-            Thread.sleep(1000);
+            // Wait for file to be fully written and finalized
+            Thread.sleep(2000);
+
+            // Verify video file exists and has content
+            java.io.File videoFile = new java.io.File(videoFilePath);
+            if (videoFile.exists()) {
+                long fileSize = videoFile.length();
+                System.out.println("📊 Video file size: " + formatFileSize(fileSize));
+
+                if (fileSize < 1000) {
+                    System.err.println("⚠️  Warning: Video file is very small (" + fileSize + " bytes) - may be corrupted");
+                }
+            } else {
+                System.err.println("❌ Video file not found: " + videoFilePath);
+            }
 
             return videoFilePath;
 
         } catch (Exception e) {
-            System.err.println("Failed to stop screen recording: " + e.getMessage());
+            System.err.println("❌ Failed to stop screen recording: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Stop iOS recording gracefully by sending SIGINT
+     * This allows xcrun simctl to properly finalize the video file
+     */
+    private void stopIOSRecordingGracefully() {
+        try {
+            // Get the process ID
+            long pid = recordingProcess.pid();
+            System.out.println("📹 Sending interrupt signal to recording process (PID: " + pid + ")");
+
+            // Send SIGINT (Ctrl+C) to allow graceful shutdown
+            // This is equivalent to pressing Ctrl+C in terminal
+            String[] command = {"kill", "-2", String.valueOf(pid)};
+            Process killProcess = Runtime.getRuntime().exec(command);
+            killProcess.waitFor();
+
+            System.out.println("✅ Interrupt signal sent, waiting for process to finalize video...");
+
+        } catch (Exception e) {
+            System.err.println("⚠️  Failed to send interrupt signal, using destroy(): " + e.getMessage());
+            recordingProcess.destroy();
+        }
+    }
+
+    /**
+     * Format file size in human-readable format
+     */
+    private String formatFileSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(1024));
+        char pre = "KMGTPE".charAt(exp - 1);
+        return String.format("%.2f %sB", bytes / Math.pow(1024, exp), pre);
     }
 
     /**
@@ -201,7 +263,8 @@ public class ScreenRecorder {
      */
     public static boolean isFFmpegInstalled() {
         try {
-            Process process = Runtime.getRuntime().exec("ffmpeg -version");
+            String[] command = {"ffmpeg", "-version"};
+            Process process = Runtime.getRuntime().exec(command);
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = reader.readLine();
             return line != null && line.contains("ffmpeg");

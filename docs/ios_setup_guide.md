@@ -200,7 +200,7 @@ mvn clean test -Dplatform=ios
 mvn test -Dcucumber.filter.tags="@smoke"
 
 # Run specific feature
-mvn test -Dcucumber.options="src/test/resources/features/app1/iosExplorer.feature"
+mvn test -Dcucumber.options="src/test/resources/features/wikipedia/iosExplorer.feature"
 
 # Run with custom bundle ID
 mvn test -Dplatform=ios -Dios.bundleId=org.wikimedia.wikipedia

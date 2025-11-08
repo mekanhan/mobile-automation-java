@@ -1,7 +1,7 @@
 package steps;
 
 import io.appium.java_client.AppiumDriver;
-import mobile.automation.pages.app1.IOSExplorerPage;
+import mobile.automation.pages.wikipedia.IOSExplorerPage;
 import mobile.automation.pages.base.BasePage;
 
 /**

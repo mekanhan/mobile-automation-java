@@ -28,3 +28,5 @@
 # OS
 .DS_Store
 Thumbs.db
+# Script logs
+scripts/*.log

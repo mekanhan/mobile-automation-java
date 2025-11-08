@@ -1,7 +1,6 @@
 package steps;
 
 import io.appium.java_client.AppiumDriver;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import mobile.automation.pages.base.BasePage;
@@ -30,6 +29,7 @@ public class CommonSteps {
 
     /**
      * Click/Tap on element
+     * Element name can be: constant (HEADER_TODAY), friendly name (Today Header), or direct locator
      */
     @When("I click on {string}")
     @When("I tap {string}")
@@ -40,6 +40,7 @@ public class CommonSteps {
 
     /**
      * Enter text into field
+     * Field name can be: constant (SEARCH_FIELD), friendly name (Search Field), or direct locator
      */
     @When("I enter {string} into {string}")
     @When("I type {string} into {string}")
@@ -49,6 +50,7 @@ public class CommonSteps {
 
     /**
      * Clear and enter text
+     * Field name can be: constant (SEARCH_FIELD), friendly name (Search Field), or direct locator
      */
     @When("I clear and enter {string} into {string}")
     public void iClearAndEnter(String text, String fieldName) {
@@ -57,6 +59,7 @@ public class CommonSteps {
 
     /**
      * Wait for element to appear
+     * Element name can be: constant (TAB_PLACES), friendly name (Places Tab), or direct locator
      */
     @When("I wait for {string} to appear")
     @When("I wait for {string} to be visible")
@@ -66,6 +69,7 @@ public class CommonSteps {
 
     /**
      * Wait for element to disappear
+     * Element name can be: constant (TAB_PLACES), friendly name (Places Tab), or direct locator
      */
     @When("I wait for {string} to disappear")
     public void iWaitForElementToDisappear(String elementName) {
@@ -108,6 +112,7 @@ public class CommonSteps {
 
     /**
      * Scroll to element
+     * Element name can be: constant (HEADER_TOP_READ), friendly name (Top Read), or direct locator
      */
     @When("I scroll to {string}")
     public void iScrollTo(String elementName) {
@@ -118,6 +123,7 @@ public class CommonSteps {
 
     /**
      * Verify element is visible
+     * Element name can be: constant (HEADER_TODAY), friendly name (Today Header), or direct locator
      */
     @Then("I should see {string}")
     @Then("{string} should be visible")
@@ -129,6 +135,7 @@ public class CommonSteps {
 
     /**
      * Verify element is not visible
+     * Element name can be: constant, friendly name, or direct locator
      */
     @Then("I should not see {string}")
     @Then("{string} should not be visible")
@@ -139,6 +146,7 @@ public class CommonSteps {
 
     /**
      * Verify element is enabled
+     * Element name can be: constant, friendly name, or direct locator
      */
     @Then("{string} should be enabled")
     public void elementShouldBeEnabled(String elementName) {
@@ -148,6 +156,7 @@ public class CommonSteps {
 
     /**
      * Verify element contains text
+     * Element name can be: constant, friendly name, or direct locator
      */
     @Then("{string} should contain text {string}")
     @Then("{string} contains {string}")
@@ -158,6 +167,7 @@ public class CommonSteps {
 
     /**
      * Verify element text equals
+     * Element name can be: constant, friendly name, or direct locator
      */
     @Then("{string} should have text {string}")
     @Then("{string} text is {string}")
@@ -188,12 +198,112 @@ public class CommonSteps {
     }
 
     /**
-     * Take screenshot
+     * Take screenshot manually during test execution
+     * Screenshots are automatically saved to target/screenshots directory
+     * and attached to Allure report if Allure is enabled
      */
     @When("I take a screenshot")
+    @When("I capture a screenshot")
     public void iTakeScreenshot() {
-        // Screenshot logic would go here
-        // This is typically handled by hooks
+        if (driver != null) {
+            try {
+                byte[] screenshot = ((org.openqa.selenium.TakesScreenshot) driver)
+                        .getScreenshotAs(org.openqa.selenium.OutputType.BYTES);
+
+                String timestamp = String.valueOf(System.currentTimeMillis());
+                String fileName = "manual_screenshot_" + timestamp;
+
+                // Save to file system
+                saveScreenshotToFile(screenshot, fileName);
+
+                // Try to attach to Allure report if available
+                try {
+                    io.qameta.allure.Allure.getLifecycle().addAttachment(
+                        fileName,
+                        "image/png",
+                        "png",
+                        screenshot
+                    );
+                    System.out.println("✅ Screenshot attached to Allure report: " + fileName);
+                } catch (NoClassDefFoundError e) {
+                    System.out.println("✅ Screenshot saved (Allure not available): " + fileName);
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Failed to capture screenshot: " + e.getMessage());
+            }
+        } else {
+            System.err.println("❌ Cannot take screenshot: driver is null");
+        }
+    }
+
+    /**
+     * Save screenshot to file system with compression
+     */
+    private void saveScreenshotToFile(byte[] screenshot, String name) {
+        try {
+            java.nio.file.Path screenshotsDir = java.nio.file.Paths.get("target/screenshots");
+            if (!java.nio.file.Files.exists(screenshotsDir)) {
+                java.nio.file.Files.createDirectories(screenshotsDir);
+            }
+
+            // Compress screenshot
+            byte[] compressedScreenshot = compressScreenshot(screenshot);
+
+            java.nio.file.Path screenshotPath = screenshotsDir.resolve(name + ".jpg");
+            java.nio.file.Files.write(screenshotPath, compressedScreenshot);
+
+            // Calculate size reduction
+            long originalSize = screenshot.length;
+            long compressedSize = compressedScreenshot.length;
+            int reduction = (int) ((1 - (double) compressedSize / originalSize) * 100);
+
+            System.out.println("📁 Screenshot saved to: " + screenshotPath);
+            System.out.println("📊 Size: " + formatBytes(compressedSize) + " (reduced by " + reduction + "%)");
+        } catch (Exception e) {
+            System.err.println("❌ Failed to save screenshot to file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Compress screenshot to reduce file size
+     */
+    private byte[] compressScreenshot(byte[] originalScreenshot) {
+        try {
+            java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(originalScreenshot);
+            java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(bais);
+
+            // Get quality from system property (default: 0.7 = 70%)
+            float quality = Float.parseFloat(System.getProperty("screenshot.quality", "0.7"));
+
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageWriter writer = javax.imageio.ImageIO.getImageWritersByFormatName("jpg").next();
+            javax.imageio.stream.ImageOutputStream ios = javax.imageio.ImageIO.createImageOutputStream(baos);
+            writer.setOutput(ios);
+
+            javax.imageio.ImageWriteParam param = writer.getDefaultWriteParam();
+            if (param.canWriteCompressed()) {
+                param.setCompressionMode(javax.imageio.ImageWriteParam.MODE_EXPLICIT);
+                param.setCompressionQuality(quality);
+            }
+
+            writer.write(null, new javax.imageio.IIOImage(image, null, null), param);
+            writer.dispose();
+            ios.close();
+
+            return baos.toByteArray();
+        } catch (Exception e) {
+            System.err.println("⚠️  Failed to compress screenshot: " + e.getMessage());
+            return originalScreenshot;
+        }
+    }
+
+    /**
+     * Format bytes to human-readable size
+     */
+    private String formatBytes(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
+        return String.format("%.1f MB", bytes / (1024.0 * 1024.0));
     }
 
     /**

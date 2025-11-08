@@ -16,7 +16,7 @@ This document explains the optimized step definitions architecture implemented f
 ┌──────────────────▼──────────────────────┐
 │   Step Definitions Layer                 │
 │   ├─ CommonSteps (Generic)               │
-│   └─ App1Steps (App-specific)            │
+│   └─ WikipediaSteps (App-specific)       │
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
@@ -59,7 +59,7 @@ public abstract class BasePage {
 ```
 
 ### 2. IOSExplorerPage (Concrete Page)
-**Location:** `src/main/java/mobile/automation/pages/app1/IOSExplorerPage.java`
+**Location:** `src/main/java/mobile/automation/pages/wikipedia/IOSExplorerPage.java`
 
 **Purpose:** Wikipedia Explorer page-specific implementation
 
@@ -117,8 +117,8 @@ Then "element" should contain text "text"
 Then "element" should have text "text"
 ```
 
-### 4. App1Steps (App-Specific Steps)
-**Location:** `src/test/java/steps/App1Steps.java`
+### 4. WikipediaSteps (App-Specific Steps)
+**Location:** `src/test/java/steps/WikipediaSteps.java`
 
 **Purpose:** Wikipedia app-specific step definitions
 
@@ -188,7 +188,7 @@ Scenario: Save featured article
 - **BasePage**: Actions
 - **IOSExplorerPage**: Element definitions
 - **CommonSteps**: Generic step mappings
-- **App1Steps**: App-specific step mappings
+- **WikipediaSteps**: App-specific step mappings
 
 ### 3. Easy Maintenance
 - Change click implementation → Update **one** place (BasePage)
@@ -304,15 +304,15 @@ src/
 │   ├── pages/
 │   │   ├── base/
 │   │   │   └── BasePage.java          # ⭐ Core actions
-│   │   └── app1/
+│   │   └── wikipedia/
 │   │       └── IOSExplorerPage.java   # Element mappings
 │   └── utils/
 │       └── WaitUtils.java             # Wait strategies
 └── test/
     ├── java/steps/
     │   ├── CommonSteps.java           # ⭐ Generic steps
-    │   └── App1Steps.java             # App-specific steps
-    └── resources/features/app1/
+    │   └── WikipediaSteps.java        # App-specific steps
+    └── resources/features/wikipedia/
         └── iosExplorer.feature        # Test scenarios
 ```
 

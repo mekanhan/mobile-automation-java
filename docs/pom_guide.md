@@ -15,7 +15,7 @@ This architecture follows the **Page Object Model (POM)** design pattern with:
 src/main/java/mobile/automation/pages/
 ├── base/
 │   └── BasePage.java              ← Common actions (tap, sendKeys, scroll, etc.)
-└── app1/
+└── wikipedia/
     ├── IOSExplorerPage.java       ← Explorer page elements & actions
     ├── IOSLoginPage.java          ← (Next: Login page)
     └── AndroidLoginPage.java      ← (For Android)

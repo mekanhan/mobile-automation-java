@@ -4,13 +4,13 @@ import io.appium.java_client.AppiumDriver;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import mobile.automation.pages.app1.IOSExplorerPage;
+import mobile.automation.pages.wikipedia.IOSExplorerPage;
 import org.testng.Assert;
 
 /**
- * App-specific step definitions for Wikipedia app
+ * Wikipedia app-specific step definitions
  */
-public class App1Steps {
+public class WikipediaSteps {
 
     private IOSExplorerPage explorerPage;
     private CommonSteps commonSteps;
@@ -19,7 +19,7 @@ public class App1Steps {
      * Constructor for dependency injection
      * Cucumber will inject the shared TestContext
      */
-    public App1Steps(TestContext testContext) {
+    public WikipediaSteps(TestContext testContext) {
         this.explorerPage = testContext.getExplorerPage();
         this.commonSteps = new CommonSteps(testContext);
     }

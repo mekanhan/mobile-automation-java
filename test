@@ -1,0 +1,144 @@
+#!/bin/bash
+# Test Scripts - Similar to package.json scripts
+# Usage: ./test <command>
+
+set -e
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Helper function to clean results
+clean_results() {
+    echo -e "${BLUE}Cleaning old Allure results...${NC}"
+    rm -rf allure-results/*
+}
+
+# Helper function to generate and open report
+open_report() {
+    echo -e "${GREEN}Generating Allure report...${NC}"
+    mvn allure:report
+    echo -e "${GREEN}Opening report in browser...${NC}"
+    ./scripts/open-report.sh &
+}
+
+# Main command router
+case "$1" in
+    # Test commands
+    "test:smoke")
+        echo -e "${BLUE}Running smoke tests...${NC}"
+        clean_results
+        mvn clean test -Psmoke
+        ;;
+
+    "test:navigation")
+        echo -e "${BLUE}Running navigation tests...${NC}"
+        clean_results
+        mvn clean test -Pnavigation
+        ;;
+
+    "test:regression")
+        echo -e "${BLUE}Running regression tests...${NC}"
+        clean_results
+        mvn clean test -Pregression
+        ;;
+
+    "test:ios")
+        echo -e "${BLUE}Running iOS tests...${NC}"
+        clean_results
+        mvn clean test -Pios
+        ;;
+
+    "test:android")
+        echo -e "${BLUE}Running Android tests...${NC}"
+        clean_results
+        mvn clean test -Pandroid
+        ;;
+
+    "test:tag")
+        if [ -z "$2" ]; then
+            echo -e "${RED}Error: Please provide a tag${NC}"
+            echo "Usage: ./test test:tag @your-tag"
+            exit 1
+        fi
+        echo -e "${BLUE}Running tests with tag: $2${NC}"
+        clean_results
+        mvn clean test -Dcucumber.filter.tags="$2"
+        ;;
+
+    "test:all")
+        echo -e "${BLUE}Running all tests...${NC}"
+        clean_results
+        mvn clean test
+        ;;
+
+    # Report commands
+    "report:generate")
+        mvn allure:report
+        echo -e "${GREEN}Report generated at: target/allure-report/${NC}"
+        ;;
+
+    "report:open")
+        ./scripts/open-report.sh
+        ;;
+
+    "report:serve")
+        mvn allure:serve
+        ;;
+
+    "report:clean")
+        echo -e "${BLUE}Cleaning Allure results...${NC}"
+        rm -rf allure-results/* target/allure-report
+        echo -e "${GREEN}Results cleaned!${NC}"
+        ;;
+
+    # Utility commands
+    "clean")
+        echo -e "${BLUE}Cleaning project...${NC}"
+        mvn clean
+        rm -rf allure-results/*
+        echo -e "${GREEN}Project cleaned!${NC}"
+        ;;
+
+    "compile")
+        echo -e "${BLUE}Compiling project...${NC}"
+        mvn clean compile
+        ;;
+
+    "help"|"")
+        echo -e "${GREEN}Available commands:${NC}"
+        echo ""
+        echo -e "${BLUE}Test Commands:${NC}"
+        echo "  test:smoke       - Run smoke tests (@smoke)"
+        echo "  test:navigation  - Run navigation tests (@navigation)"
+        echo "  test:regression  - Run regression tests (@regression)"
+        echo "  test:ios         - Run iOS tests (@ios)"
+        echo "  test:android     - Run Android tests (@android)"
+        echo "  test:tag @tag    - Run tests with custom tag"
+        echo "  test:all         - Run all tests"
+        echo ""
+        echo -e "${BLUE}Report Commands:${NC}"
+        echo "  report:generate  - Generate Allure report"
+        echo "  report:open      - Open existing report"
+        echo "  report:serve     - Generate and serve report with Allure server"
+        echo "  report:clean     - Clean all Allure results"
+        echo ""
+        echo -e "${BLUE}Utility Commands:${NC}"
+        echo "  clean            - Clean project and results"
+        echo "  compile          - Compile project"
+        echo "  help             - Show this help message"
+        echo ""
+        echo -e "${BLUE}Examples:${NC}"
+        echo "  ./test test:smoke"
+        echo "  ./test test:tag @navigation1"
+        echo "  ./test report:open"
+        ;;
+
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        echo "Run './test help' to see available commands"
+        exit 1
+        ;;
+esac

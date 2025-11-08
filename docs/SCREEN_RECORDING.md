@@ -32,6 +32,8 @@ Automatically record test executions with video playback in reports.
 
 ### Enable Screen Recording
 
+**Option 1: Command Line (Temporary)**
+
 Add `-Dscreen.recording=true` to your test command:
 
 ```bash
@@ -39,12 +41,25 @@ Add `-Dscreen.recording=true` to your test command:
 mvn test -Dcucumber.filter.tags="@navigation1" -Dscreen.recording=true
 ```
 
+**Option 2: config.properties (Permanent)**
+
+Edit `src/main/resources/config.properties`:
+
+```properties
+# Screen Recording
+screen.recording=true
+```
+
+This enables recording for all test runs until you change it back to `false`.
+
 ### Without Screen Recording (Default)
 
 ```bash
 # Normal test execution (no recording)
 mvn test -Dcucumber.filter.tags="@navigation1"
 ```
+
+**Note:** Recording is **DISABLED by default** (`screen.recording=false`) to save disk space and improve test speed.
 
 ---
 
@@ -99,19 +114,56 @@ target/
 
 ## Viewing Recordings
 
-### In Allure Report
-Videos are automatically attached to test results:
+### Video Display Size
 
-1. Run tests with recording
-2. Generate Allure report:
+**Important:** iPhone 16 Pro videos are recorded at **1507x2642 pixels** (portrait), which is very large.
+
+### In Cucumber HTML Report
+
+⚠️ **Limitation:** Cucumber HTML reports display videos at **original size** (1507x2642).
+
+**Why this happens:**
+- Cucumber's `scenario.attach()` doesn't support size control
+- HTML embeds are shown as text (not rendered)
+- Browser security prevents `file://` protocol URLs
+
+**Workarounds:**
+1. **Use browser zoom** - Press `Cmd + -` (Mac) or `Ctrl + -` (Windows) to zoom out
+2. **Click to open in new tab** - Then use video player controls
+3. **Open directly** - Navigate to `target/recordings/` and open the MP4 file
+4. **Use Allure reports** (recommended - see below)
+
+### In Allure Report (✅ Best Experience)
+
+**Recommended for video viewing!** Allure reports provide:
+- ✅ Automatic video scaling
+- ✅ Inline playback
+- ✅ Better UI/UX
+- ✅ Professional presentation
+
+**Steps:**
+1. Run tests with recording:
+   ```bash
+   mvn test -Dcucumber.filter.tags="@smoke"
+   ```
+
+2. Generate and open Allure report:
+   ```bash
+   mvn allure:serve
+   ```
+   Or:
    ```bash
    mvn allure:report
    open target/allure-report/index.html
    ```
-3. Click on any test → See attached video
 
-### In ExtentReports
-Videos are attached as `video/mp4` MIME type
+3. Navigate to failed/completed test → Click attachments → Watch video
+
+**Allure automatically:**
+- Scales videos to fit the viewer
+- Provides play controls
+- Shows video metadata
+- Allows fullscreen viewing
 
 ### Direct File Access
 ```bash
@@ -126,9 +178,20 @@ open target/recordings/iOS_test_20250118_120000.mp4
 
 ## Advanced Usage
 
-### Clean Old Recordings
+### Automatic Cleanup (Default Behavior)
 
-Recordings can accumulate. Clean old files programmatically:
+**Recordings are automatically cleaned before each test session!**
+
+The framework cleans `target/recordings/` directory in the `@BeforeAll` hook, ensuring a fresh start for each test run.
+
+**To disable automatic cleanup:**
+```bash
+mvn test -Drecordings.clean=false
+```
+
+### Manual Cleanup (Alternative)
+
+You can also clean old files programmatically by age:
 
 ```java
 // In your test cleanup

@@ -1,17 +1,34 @@
-@ios @app1 @explorer
+@ios @wikipedia @explorer
 Feature: Wikipedia Explorer Page
 
   Background:
     Given I am on the Explorer page
 
-  @smoke @navigation1
+  @smoke @navigation1 @screenshot
   Scenario: Verify Explorer page elements are visible
-    When I scroll to "Today Header"
-    Then I should see "Today Header"
-    And I should see "Featured Article"
-    And I should see "Search Field"
-    # And I should see "Tabs Button"
-    # And I should see "Profile Button"
+    When I scroll to "HEADER_TODAY"
+    Then I should see "HEADER_TODAY"
+    And  I should see "HEADER_FEATURED_ARTICLE"
+    And  I should see "SEARCH_FIELD"
+    # Tab Bar Elements
+    And  I should see "TAB_PLACES"
+    And  I should see "TAB_SAVED"
+    And  I should see "TAB_HISTORY"
+    And  I should see "TAB_SEARCH"
+    # Navigation Bar Elements
+    And  I should see "WIKIPEDIA_LOGO"
+    # View tabs 
+    When I tap on "TABS_BUTTON"
+    Then I should see "Main Page"
+    And  I should see "add"
+    And  I should see "Main Page Wikipedia’s daily highlights"
+    When I tap on "Done"
+    # View Profile
+    When I tap on "PROFILE_BUTTON"
+    Then I should see "LOGIN_JOIN"
+    And  I should see "DONATE"
+    And  I should see "SETTINGS"
+    When I tap on "Done"
 
   @smoke @search
   Scenario: Search for an article

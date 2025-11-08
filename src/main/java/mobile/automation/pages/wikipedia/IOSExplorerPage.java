@@ -1,4 +1,4 @@
-package mobile.automation.pages.app1;
+package mobile.automation.pages.wikipedia;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
@@ -14,14 +14,28 @@ import org.openqa.selenium.support.PageFactory;
 public class IOSExplorerPage extends BasePage {
 
     // ============================================
-    // ELEMENT IDENTIFIERS (Accessibility IDs)
+    // ELEMENT IDENTIFIERS (Accessibility IDs AND OR XPATHS)
     // ============================================
     
+    // Header Elements
+    private static final String WIKIPEDIA_LOGO = "wikipedia";
     // Navigation Bar Elements
     private static final String TABS_BUTTON = "Tabs";
     private static final String PROFILE_BUTTON = "profile-button";
     private static final String SEARCH_FIELD = "Search Wikipedia";
-    
+
+    // Profile Elements
+    private static final String LOGIN_JOIN = "//XCUIElementTypeStaticText[@name=\"Log in / Join Wikipedia\"]";
+    private static final String DONATE = "//XCUIElementTypeStaticText[@name=\"Donate\"]";
+    private static final String SETTINGS = "//XCUIElementTypeStaticText[@name=\"Settings\"]";
+
+    // Tab Section Elements
+    private static final String ADD_NEW_TAB = "add";
+    private static final String MAIN_PAGE_TAB = "Main Page";
+    private static final String MAIN_PAGE_DESCRIPTION = "Main Page Wikipedia's daily highlights";
+    private static final String DONE_BUTTON = "Done";
+
+
     // Featured Article Section
     private static final String OVERFLOW_BUTTON = "overflow";
     private static final String FEATURED_ARTICLE_TITLE = "Neutral Milk Hotel";
@@ -331,22 +345,170 @@ public class IOSExplorerPage extends BasePage {
         return getTextByAccessibilityId("Neutral Milk Hotel");
     }
 
+    // ============================================
+    // ELEMENT LOCATOR MAP
+    // (Maps friendly element names to actual locators)
+    // ============================================
+
     /**
-     * Check if element is visible by name (for step definitions)
+     * Element name to locator mapping
+     * Maps both constant names (e.g., "HEADER_TODAY") and friendly names (e.g., "Today Header")
+     * to actual accessibility IDs or XPaths
      */
-    public boolean isElementVisible(String elementName) {
-        // Map friendly names to accessibility IDs
-        switch (elementName) {
-            case "Article Title":
-                return isElementDisplayedByAccessibilityId("Neutral Milk Hotel");
-            case "Search Field":
-                return isElementDisplayed(searchField);
-            case "Today Header":
-                return isElementDisplayedByAccessibilityId("Today");
-            case "Featured Article":
-                return isElementDisplayedByAccessibilityId("Featured article");
-            default:
-                return isElementDisplayedByAccessibilityId(elementName);
-        }
+    private static final java.util.Map<String, String> ELEMENT_MAP;
+
+    static {
+        ELEMENT_MAP = new java.util.HashMap<>();
+
+        // Header Elements - using constant names
+        ELEMENT_MAP.put("HEADER_TODAY", HEADER_TODAY);
+        ELEMENT_MAP.put("HEADER_FEATURED_ARTICLE", HEADER_FEATURED_ARTICLE);
+        ELEMENT_MAP.put("HEADER_TOP_READ", HEADER_TOP_READ);
+
+        // Header Elements - using friendly names
+        ELEMENT_MAP.put("Today Header", HEADER_TODAY);
+        ELEMENT_MAP.put("Featured Article", HEADER_FEATURED_ARTICLE);
+        ELEMENT_MAP.put("Top Read", HEADER_TOP_READ);
+
+        // Tab Bar Elements - constant names
+        ELEMENT_MAP.put("TAB_EXPLORE", TAB_EXPLORE);
+        ELEMENT_MAP.put("TAB_PLACES", TAB_PLACES);
+        ELEMENT_MAP.put("TAB_SAVED", TAB_SAVED);
+        ELEMENT_MAP.put("TAB_HISTORY", TAB_HISTORY);
+        ELEMENT_MAP.put("TAB_SEARCH", TAB_SEARCH);
+
+        // Tab Bar Elements - friendly names
+        ELEMENT_MAP.put("Explore Tab", TAB_EXPLORE);
+        ELEMENT_MAP.put("Places Tab", TAB_PLACES);
+        ELEMENT_MAP.put("Saved Tab", TAB_SAVED);
+        ELEMENT_MAP.put("History Tab", TAB_HISTORY);
+        ELEMENT_MAP.put("Search Tab", TAB_SEARCH);
+
+        // Navigation Elements - constant names
+        ELEMENT_MAP.put("SEARCH_FIELD", SEARCH_FIELD);
+        ELEMENT_MAP.put("TABS_BUTTON", TABS_BUTTON);
+        ELEMENT_MAP.put("PROFILE_BUTTON", PROFILE_BUTTON);
+        ELEMENT_MAP.put("WIKIPEDIA_LOGO", WIKIPEDIA_LOGO);
+
+        // Navigation Elements - friendly names
+        ELEMENT_MAP.put("Search Field", SEARCH_FIELD);
+        ELEMENT_MAP.put("Tabs Button", TABS_BUTTON);
+        ELEMENT_MAP.put("Profile Button", PROFILE_BUTTON);
+        ELEMENT_MAP.put("Wikipedia Logo", WIKIPEDIA_LOGO);
+
+        // Profile Elements (XPath) - constant names
+        ELEMENT_MAP.put("LOGIN_JOIN", LOGIN_JOIN);
+        ELEMENT_MAP.put("DONATE", DONATE);
+        ELEMENT_MAP.put("SETTINGS", SETTINGS);
+
+        // Profile Elements - friendly names
+        ELEMENT_MAP.put("Login Join Link", LOGIN_JOIN);
+        ELEMENT_MAP.put("Donate", DONATE);
+        ELEMENT_MAP.put("Settings", SETTINGS);
+
+        // Featured Article Elements - constant names
+        ELEMENT_MAP.put("FEATURED_ARTICLE_TITLE", FEATURED_ARTICLE_TITLE);
+        ELEMENT_MAP.put("SAVE_FOR_LATER_BUTTON", SAVE_FOR_LATER_BUTTON);
+        ELEMENT_MAP.put("OVERFLOW_BUTTON", OVERFLOW_BUTTON);
+
+        // Featured Article Elements - friendly names
+        ELEMENT_MAP.put("Article Title", FEATURED_ARTICLE_TITLE);
+        ELEMENT_MAP.put("Save For Later", SAVE_FOR_LATER_BUTTON);
+        ELEMENT_MAP.put("Overflow Button", OVERFLOW_BUTTON);
+
+        // Tab Section Elements
+        ELEMENT_MAP.put("ADD_NEW_TAB", ADD_NEW_TAB);
+        ELEMENT_MAP.put("Add New Tab", ADD_NEW_TAB);
+
+        // Common Elements
+        ELEMENT_MAP.put("MAIN_PAGE_TAB", MAIN_PAGE_TAB);
+        ELEMENT_MAP.put("Main Page Tab", MAIN_PAGE_TAB);
+        ELEMENT_MAP.put("MAIN_PAGE_DESCRIPTION", MAIN_PAGE_DESCRIPTION);
+        ELEMENT_MAP.put("DONE_BUTTON", DONE_BUTTON);
+        ELEMENT_MAP.put("Done", DONE_BUTTON);
     }
+
+    /**
+     * Gets element locator by friendly name or constant name
+     * If the name is not in the map, returns the name itself
+     * (assumes it's a direct locator like XPath or accessibility ID)
+     *
+     * @param elementName The friendly name, constant name, or direct locator
+     * @return The actual locator (accessibility ID or XPath)
+     */
+    public String getElementLocator(String elementName) {
+        return ELEMENT_MAP.getOrDefault(elementName, elementName);
+    }
+
+    /**
+     * Checks if element is visible using friendly name, constant, or direct locator
+     * This method overrides the base class to use the element map
+     *
+     * @param elementName The friendly name, constant name, or direct locator
+     * @return true if element is visible, false otherwise
+     */
+    @Override
+    public boolean isElementVisible(String elementName) {
+        String locator = getElementLocator(elementName);
+        return super.isElementVisible(locator);
+    }
+
+    /**
+     * Click on element using friendly name, constant, or direct locator
+     * This method overrides the base class to use the element map
+     *
+     * @param elementName The friendly name, constant name, or direct locator
+     */
+    @Override
+    public void click(String elementName) {
+        String locator = getElementLocator(elementName);
+        super.click(locator);
+    }
+
+    /**
+     * Enter text into field using friendly name, constant, or direct locator
+     * This method overrides the base class to use the element map
+     *
+     * @param elementName The friendly name, constant name, or direct locator
+     * @param text The text to enter
+     */
+    @Override
+    public void enterText(String elementName, String text) {
+        String locator = getElementLocator(elementName);
+        super.enterText(locator, text);
+    }
+
+    /**
+     * Get text from element using friendly name, constant, or direct locator
+     * This method overrides the base class to use the element map
+     *
+     * @param elementName The friendly name, constant name, or direct locator
+     * @return The text of the element
+     */
+    @Override
+    public String getText(String elementName) {
+        String locator = getElementLocator(elementName);
+        return super.getText(locator);
+    }
+
+    // ============================================
+    // PUBLIC GETTERS FOR LOCATORS
+    // (Alternative approach - use these in step definitions if needed)
+    // ============================================
+
+    public String getTabPlacesLocator() { return TAB_PLACES; }
+    public String getTabExploreLocator() { return TAB_EXPLORE; }
+    public String getTabSavedLocator() { return TAB_SAVED; }
+    public String getTabHistoryLocator() { return TAB_HISTORY; }
+    public String getTabSearchLocator() { return TAB_SEARCH; }
+    public String getSearchFieldLocator() { return SEARCH_FIELD; }
+    public String getHeaderTodayLocator() { return HEADER_TODAY; }
+    public String getHeaderFeaturedArticleLocator() { return HEADER_FEATURED_ARTICLE; }
+    public String getHeaderTopReadLocator() { return HEADER_TOP_READ; }
+    public String getTabsButtonLocator() { return TABS_BUTTON; }
+    public String getProfileButtonLocator() { return PROFILE_BUTTON; }
+    public String getLoginJoinLocator() { return LOGIN_JOIN; }
+    public String getDonateLocator() { return DONATE; }
+    public String getSettingsLocator() { return SETTINGS; }
+    public String getFeaturedArticleTitleLocator() { return FEATURED_ARTICLE_TITLE; }
 }

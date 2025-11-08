@@ -39,7 +39,7 @@ Based on the app's XML structure:
 
 ### 1. IOSTipsPage Class
 
-**Location:** `src/main/java/mobile/automation/pages/app1/IOSTipsPage.java`
+**Location:** `src/main/java/mobile/automation/pages/wikipedia/IOSTipsPage.java`
 
 **Key Methods:**
 
@@ -269,7 +269,7 @@ Possible improvements:
 
 ## Related Files
 
-- **Page Object:** `src/main/java/mobile/automation/pages/app1/IOSTipsPage.java`
+- **Page Object:** `src/main/java/mobile/automation/pages/wikipedia/IOSTipsPage.java`
 - **Hooks:** `src/test/java/hooks/Hooks.java`
 - **XML Reference:** `src/test/resources/xml_pages/wikipedia_tips_page.xml`
 - **Config:** `src/main/resources/config.properties`

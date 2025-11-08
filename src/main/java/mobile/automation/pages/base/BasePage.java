@@ -165,7 +165,21 @@ public abstract class BasePage {
             return false;
         }
     }
-    
+
+    /**
+     * Checks if an element is displayed using XPath
+     * @param xpath The XPath of the element
+     * @return true if the element is displayed, false otherwise
+     */
+    protected boolean isElementDisplayedByXPath(String xpath) {
+        try {
+            WebElement element = driver.findElement(AppiumBy.xpath(xpath));
+            return isElementDisplayed(element);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /**
      * Checks if an element is enabled
      * @param element The element to check
@@ -254,16 +268,13 @@ public abstract class BasePage {
     }
     
     /**
-     * Scrolls to an element using accessibility ID (iOS specific)
-     * @param elementName The friendly name or accessibility ID of the element
+     * Scrolls to an element using accessibility ID or XPath locator (iOS specific)
+     * @param locator The accessibility ID or XPath of the element
      */
-    public void scrollToElement(String elementName) {
-        // Convert friendly name to accessibility ID if needed
-        String accessibilityId = mapFriendlyNameToAccessibilityId(elementName);
-
+    public void scrollToElement(String locator) {
         // Check if element is already visible
-        if (isElementDisplayedByAccessibilityId(accessibilityId)) {
-            System.out.println("Element '" + elementName + "' is already visible, no scroll needed");
+        if (isElementVisible(locator)) {
+            System.out.println("Element '" + locator + "' is already visible, no scroll needed");
             return;
         }
 
@@ -272,8 +283,8 @@ public abstract class BasePage {
         for (int i = 0; i < maxScrolls; i++) {
             try {
                 // Try to find the element
-                if (isElementDisplayedByAccessibilityId(accessibilityId)) {
-                    System.out.println("Element '" + elementName + "' found after " + i + " scrolls");
+                if (isElementVisible(locator)) {
+                    System.out.println("Element '" + locator + "' found after " + i + " scrolls");
                     return;
                 }
             } catch (Exception e) {
@@ -290,30 +301,7 @@ public abstract class BasePage {
             }
         }
 
-        throw new RuntimeException("Element '" + elementName + "' not found after " + maxScrolls + " scroll attempts");
-    }
-
-    /**
-     * Map friendly element names to actual accessibility IDs
-     * Override this in page objects for page-specific mappings
-     */
-    protected String mapFriendlyNameToAccessibilityId(String friendlyName) {
-        // Common mappings
-        switch (friendlyName) {
-            case "Today Header":
-                return "Today";
-            case "Featured Article":
-                return "Featured article";
-            case "Search Field":
-                return "Search Wikipedia";
-            case "Tabs Button":
-                return "Tabs";
-            case "Profile Button":
-                return "profile-button";
-            default:
-                // Return as-is if no mapping found
-                return friendlyName;
-        }
+        throw new RuntimeException("Element '" + locator + "' not found after " + maxScrolls + " scroll attempts");
     }
     
     /**
@@ -383,43 +371,88 @@ public abstract class BasePage {
     }
 
     // ============================================
+    // HELPER METHODS
+    // ============================================
+
+    /**
+     * Determines if a locator string is an XPath expression
+     * @param locator The locator string to check
+     * @return true if the locator is an XPath, false otherwise
+     */
+    private boolean isXPath(String locator) {
+        return locator != null && (locator.startsWith("/") || locator.startsWith("("));
+    }
+
+    // ============================================
     // LEGACY/COMPATIBILITY METHODS
     // (For backward compatibility with step definitions)
     // ============================================
 
     /**
      * Click on element by name (legacy method for step definitions)
-     * @param elementName The friendly name of the element
+     * Uses smart detection for XPath vs Accessibility ID
+     * @param elementName The friendly name, constant, or direct locator
      */
     public void click(String elementName) {
-        tapByAccessibilityId(elementName);
+        if (isXPath(elementName)) {
+            tapByXPath(elementName);
+        } else {
+            tapByAccessibilityId(elementName);
+        }
     }
 
     /**
      * Enter text into field by name (legacy method for step definitions)
-     * @param elementName The friendly name of the element
+     * Uses smart detection for XPath vs Accessibility ID
+     * @param elementName The friendly name, constant, or direct locator
      * @param text The text to enter
      */
     public void enterText(String elementName, String text) {
-        sendKeysByAccessibilityId(elementName, text);
+        if (isXPath(elementName)) {
+            // For XPath, find element and send keys
+            WebElement element = driver.findElement(AppiumBy.xpath(elementName));
+            sendKeys(element, text);
+        } else {
+            sendKeysByAccessibilityId(elementName, text);
+        }
     }
 
     /**
      * Get text from element by name (legacy method for step definitions)
-     * @param elementName The friendly name of the element
+     * Uses smart detection for XPath vs Accessibility ID
+     * @param elementName The friendly name, constant, or direct locator
      * @return The text of the element
      */
     public String getText(String elementName) {
-        return getTextByAccessibilityId(elementName);
+        if (isXPath(elementName)) {
+            WebElement element = driver.findElement(AppiumBy.xpath(elementName));
+            return getText(element);
+        } else {
+            return getTextByAccessibilityId(elementName);
+        }
     }
 
     /**
-     * Check if element is visible by name (legacy method for step definitions)
-     * @param elementName The friendly name of the element
+     * Check if element is visible by name or XPath (smart method for step definitions)
+     * Automatically detects if the locator is an XPath (starts with / or //) or accessibility ID
+     * @param locator The accessibility ID or XPath of the element
      * @return true if visible, false otherwise
      */
-    public boolean isElementVisible(String elementName) {
-        return isElementDisplayedByAccessibilityId(elementName);
+    public boolean isElementVisible(String locator) {
+        if (isXPath(locator)) {
+            return isElementDisplayedByXPath(locator);
+        } else {
+            return isElementDisplayedByAccessibilityId(locator);
+        }
+    }
+
+    /**
+     * Check if element is visible by XPath (legacy method for step definitions)
+     * @param xpath The XPath of the element
+     * @return true if visible, false otherwise
+     */
+    public boolean isElementVisibleByXPath(String xpath) {
+        return isElementDisplayedByXPath(xpath);
     }
 
     /**
