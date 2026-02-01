@@ -61,7 +61,7 @@ public class IOSCapabilities {
         options.setSimulatorStartupTimeout(Duration.ofSeconds(180));
 
         // Additional Settings
-        options.setShowXcodeLog(false);  // Reduce log verbosity
+        options.setShowXcodeLog(true);  // Show Xcode logs for debugging WDA issues
         options.setClearSystemFiles(true);  // Clean temp files
 
         return options;

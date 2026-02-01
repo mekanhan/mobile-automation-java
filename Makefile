@@ -2,7 +2,7 @@
 # Similar to package.json scripts but more powerful
 # Usage: make <target>
 
-.PHONY: help test-smoke test-navigation test-regression test-ios test-android test-all report-open report-generate report-serve report-clean clean compile
+.PHONY: help test-smoke test-navigation test-regression test-ios test-android test-all report-open report-generate report-serve report-clean clean compile check-wda setup-wda verify-ios
 
 # Default target
 .DEFAULT_GOAL := help
@@ -79,6 +79,64 @@ compile:  ## Compile project
 	@echo "$(BLUE)Compiling project...$(NC)"
 	mvn clean compile
 
+# iOS Setup and Diagnostics
+check-wda:  ## Check WebDriverAgent status and configuration
+	@echo "$(BLUE)Checking WebDriverAgent setup...$(NC)"
+	@echo "$(YELLOW)1. Checking Xcode installation:$(NC)"
+	@xcodebuild -version || echo "$(YELLOW)Xcode not found or not configured$(NC)"
+	@echo ""
+	@echo "$(YELLOW)2. Checking available simulators:$(NC)"
+	@xcrun simctl list devices | grep -A 5 "iPhone 16 Pro" || echo "$(YELLOW)iPhone 16 Pro simulator not found$(NC)"
+	@echo ""
+	@echo "$(YELLOW)3. Checking Appium WDA location:$(NC)"
+	@appium driver list --installed 2>/dev/null | grep xcuitest || echo "$(YELLOW)XCUITest driver not installed$(NC)"
+	@echo ""
+	@echo "$(YELLOW)4. System info:$(NC)"
+	@echo "User home: $$HOME"
+	@echo "Derived Data: $$HOME/Library/Developer/Xcode/DerivedData"
+
+setup-wda:  ## Setup WebDriverAgent (run this first)
+	@echo "$(BLUE)Setting up WebDriverAgent...$(NC)"
+	@echo "$(YELLOW)This will guide you through WDA setup$(NC)"
+	@echo ""
+	@echo "$(GREEN)Step 1: Install Appium XCUITest driver$(NC)"
+	@echo "Run: appium driver install xcuitest"
+	@echo ""
+	@echo "$(GREEN)Step 2: Find WDA location$(NC)"
+	@echo "Run: appium driver list --installed"
+	@echo "Look for: ~/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent"
+	@echo ""
+	@echo "$(GREEN)Step 3: Open WDA project in Xcode$(NC)"
+	@echo "Run: open ~/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/WebDriverAgent.xcodeproj"
+	@echo ""
+	@echo "$(GREEN)Step 4: In Xcode$(NC)"
+	@echo "  - Select WebDriverAgentRunner target"
+	@echo "  - Go to Signing & Capabilities"
+	@echo "  - Check 'Automatically manage signing'"
+	@echo "  - Select your Team (Personal or Developer Account)"
+	@echo "  - Build the project (Cmd+B)"
+	@echo ""
+	@echo "$(GREEN)Step 5: Verify the build succeeds$(NC)"
+	@echo "If build fails with code 65, check for signing errors in Xcode"
+
+verify-ios:  ## Verify iOS test environment setup
+	@echo "$(BLUE)Verifying iOS test environment...$(NC)"
+	@echo ""
+	@echo "$(YELLOW)1. Xcode version:$(NC)"
+	@xcodebuild -version
+	@echo ""
+	@echo "$(YELLOW)2. Available iOS simulators:$(NC)"
+	@xcrun simctl list devices available | grep iPhone
+	@echo ""
+	@echo "$(YELLOW)3. Appium server status:$(NC)"
+	@lsof -i :4723 | grep LISTEN && echo "$(GREEN)Appium is running on port 4723$(NC)" || echo "$(YELLOW)Appium is not running. Start with: appium$(NC)"
+	@echo ""
+	@echo "$(YELLOW)4. App file exists:$(NC)"
+	@ls -lh src/main/resources/apps/ios/Wikipedia.app 2>/dev/null && echo "$(GREEN)App found$(NC)" || echo "$(YELLOW)App not found$(NC)"
+	@echo ""
+	@echo "$(YELLOW)5. Java version:$(NC)"
+	@java -version
+
 # Help command - auto-generated from comments
 help:  ## Show this help message
 	@echo "$(GREEN)Available targets:$(NC)"
@@ -91,6 +149,9 @@ help:  ## Show this help message
 	@echo ""
 	@echo "$(BLUE)Utility Commands:$(NC)"
 	@grep -E '^(clean|compile):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-20s$(NC) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(BLUE)iOS Diagnostics:$(NC)"
+	@grep -E '^(check-wda|setup-wda|verify-ios):.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-20s$(NC) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(BLUE)Examples:$(NC)"
 	@echo "  make test-smoke"
